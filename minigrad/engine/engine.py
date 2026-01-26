@@ -23,23 +23,28 @@ class Value:
         return f"Value(data={self.data})"
     
     def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data + other.data, (self, other), '+')
 
         # add only copies the gradient from the parent into the children.
+        # use += if the node is used more than once. This 'accumulates' the gradients.
         def _backward():
-            self.grad = out.grad
-            other.grad = out.grad
+            self.grad += out.grad
+            other.grad += out.grad
 
         out._backward = _backward
         return out
     
-    def __mult__(self, other):
+    
+    def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), '*')
 
         # mult is the value of neighbor * output gradient.
+        # use += if the node is used more than once. This 'accumulates' the gradients.
         def _backward():
-            self.grad = out.grad * other.data
-            other.grad = out.grad * self.data
+            self.grad += out.grad * other.data
+            other.grad += out.grad * self.data
 
         out._backward = _backward
         return out
@@ -49,7 +54,67 @@ class Value:
         out = Value(t, (self, ), 'tanh')
 
         def _backward():
-            self.grad = (1 - t ** 2) * out.grad
+            # use += if the node is used more than once. This 'accumulates' the gradients.
+            self.grad += (1 - t ** 2) * out.grad
 
         out._backward = _backward
         return out
+    
+    def exp(self):
+        t = math.exp(self)
+        out = Value(t, (self, ), 'exp')
+
+        def _backward():
+            # use += if the node is used more than once. This 'accumulates' the gradients.
+            self.grad += out.grad * self.data
+
+        out._backward = _backward
+        return out
+    
+    def __pow__(self, n):
+        assert isinstance(n, (int, float)), "only support int/float"
+        t = self.data**n
+        out = Value(t, (self, ), 'pow')
+
+        def _backward():
+            # use += if the node is used more than once. This 'accumulates' the gradients.
+            self.grad += n * self.data ** (n-1) * out.grad
+
+        out._backward = _backward
+        return out
+
+
+    # Right hand value definitions for our Library class
+    def __rmult__(self, other): # other * self
+        other * self
+    def __radd__(self, other): # other + self
+        other * self
+    def __truediv__(self, other): # self / other
+        self * other**-1
+    def __neg__(self):
+        self * -1
+    def __sub__(self, other):
+        self + (-other)
+    
+    # Apply backprop to calculate gradients
+    def backward(self):
+        visited = set()
+        topo = []
+
+        # Build topological order recursively. Process children first, then yourself.
+        def build_topo(n):
+            if n not in visited:
+                visited.add(n)
+                for child in self._children:
+                    build_topo(child)
+            topo.append(n)
+
+        # Build topological order with this Value as the last one appended.
+        build_topo.self(self)
+
+        self.grad = 1.0
+
+        for node in reversed(topo):
+            node._backward()
+         
+        

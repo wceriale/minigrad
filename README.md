@@ -1,2 +1,2 @@
 # minigrad
-Small autograd + NN library, inspired by micrograd. 
+Small autograd + NN library, inspired by micrograd

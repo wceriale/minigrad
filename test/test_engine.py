@@ -1,9 +1,15 @@
 import torch
 from minigrad.engine import Value
 
+
 def test_sanity_check():
 
     x = Value(-4.0)
+    print(x)
+    f = 2 * x
+    print(f)
+    i = f + 2
+    print(i)
     z = 2 * x + 2 + x
     q = z.relu() + z * x
     h = (z * z).relu()
@@ -65,3 +71,6 @@ def test_more_ops():
     # backward pass went well
     assert abs(amg.grad - apt.grad.item()) < tol
     assert abs(bmg.grad - bpt.grad.item()) < tol
+
+
+test_sanity_check()

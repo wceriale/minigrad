@@ -1,6 +1,5 @@
 import math
 
-
 class Value: 
 
     # Children represents the Values used to create this Value.
@@ -85,16 +84,16 @@ class Value:
 
 
     # Right hand value definitions for our Library class
-    def __rmult__(self, other): # other * self
-        other * self
+    def __rmul__(self, other): # other * self
+        return self * other
     def __radd__(self, other): # other + self
-        other * self
+        return self + other
     def __truediv__(self, other): # self / other
-        self * other**-1
+        return self * other**-1
     def __neg__(self):
-        self * -1
+        return self * -1
     def __sub__(self, other):
-        self + (-other)
+        return self + (-other)
     
     # Apply backprop to calculate gradients
     def backward(self):

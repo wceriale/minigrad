@@ -15,7 +15,34 @@ class Neuron:
         out = act.tanh()
         return out
     
-x = [2.0, 3.0]
-n = Neuron(2)
+class Layer:
+
+    def __init__(self, nin, nout):
+        self.neurons = [Neuron(nin) for _ in range(nout)]
+
+    def __call__(self, x):
+        outs =  [n(x) for n in self.neurons]
+        return outs[0] if len(outs) == 1 else outs
+    
+class MLP:
+
+    # nin: number of inputs
+    # nouts: list of layer sizes [2, 3] -> Layer of 2 neurons, Layer of 3 neurons
+    def __init__(self, nin, nouts):
+        sz = [nin] + nouts
+        # Append number of inputs to front, build all layers for the MLP
+        self.layers = [Layer(sz[i], sz[i+1]) for i in range(len(nouts))]
+        
+
+    def __call__(self, x):
+        input = x
+        for layer in self.layers:
+            # Set layer output to be the next layer input
+            output = layer(input)
+            input = output
+        return output
+    
+x = [2.0, 3.0, -1.0]
+n = MLP(3, [4, 4, 1])
 
 print(n(x))

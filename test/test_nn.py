@@ -18,18 +18,21 @@ ypred = [n(x) for x in xs]
 # loss.backward()
 
 
-for k in range(20):
+for k in range(500):
     # forward pass
     ypred = [n(x) for x in xs]
     loss_arr = [(yout - ygt) ** 2 for ygt, yout in zip(ys, ypred)]
     loss = sum(loss_arr)
 
     # backprop
+    for p in n.parameters():
+        p.grad = 0.0
     loss.backward()
 
     # update
     for p in n.parameters():
-        p.data += -0.05 * p.grad
+        p.data += -0.1 * p.grad
 
-    # loss value given k iteration
-    print(k, loss.data, ypred)
+    if (k % 50 == 0 or k == 500):
+        # loss value given k iteration
+        print(k, loss.data, ypred)

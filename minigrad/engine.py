@@ -104,12 +104,12 @@ class Value:
         def build_topo(n):
             if n not in visited:
                 visited.add(n)
-                for child in self._children:
+                for child in n._children:
                     build_topo(child)
-            topo.append(n)
+                topo.append(n)
 
         # Build topological order with this Value as the last one appended.
-        build_topo.self(self)
+        build_topo(self)
 
         self.grad = 1.0
 

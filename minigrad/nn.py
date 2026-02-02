@@ -15,6 +15,9 @@ class Neuron:
         out = act.tanh()
         return out
     
+    def parameters(self):
+        return self.w + [self.b] # append the bias as an additional weight value
+    
 class Layer:
 
     def __init__(self, nin, nout):
@@ -23,6 +26,10 @@ class Layer:
     def __call__(self, x):
         outs =  [n(x) for n in self.neurons]
         return outs[0] if len(outs) == 1 else outs
+    
+    # Get all the parameters for this layer
+    def parameters(self):
+        return [p for n in self.neurons for p in n.parameters()]
     
 class MLP:
 
@@ -41,3 +48,6 @@ class MLP:
             output = layer(input)
             input = output
         return output
+    
+    def parameters(self):
+        return [p for l in self.layers for p in l.parameters()] 

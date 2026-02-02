@@ -11,19 +11,25 @@ xs = [
 
 ys = [1.0, -1.0, -1.0, 1.0] # desired targets
 ypred = [n(x) for x in xs]
-print(ypred)
+# print(ypred)
 
-loss_arr = [(yout - ygt) ** 2 for ygt, yout in zip(ys, ypred)]
-print('losses:')
-print(loss_arr)
+# loss_arr = [(yout - ygt) ** 2 for ygt, yout in zip(ys, ypred)]
 
-loss = sum(loss_arr)
-print('final loss=' )
-print(loss)
+# loss.backward()
 
-loss.backward()
-print(loss.grad)
 
-print(n.layers[1].neurons[0].w[0].grad)
+for k in range(20):
+    # forward pass
+    ypred = [n(x) for x in xs]
+    loss_arr = [(yout - ygt) ** 2 for ygt, yout in zip(ys, ypred)]
+    loss = sum(loss_arr)
 
-print(n.layers[0].neurons[0].w[1].grad)
+    # backprop
+    loss.backward()
+
+    # update
+    for p in n.parameters():
+        p.data += -0.05 * p.grad
+
+    # loss value given k iteration
+    print(k, loss.data, ypred)

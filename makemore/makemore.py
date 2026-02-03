@@ -9,7 +9,7 @@ class Bigram:
         # . represents start and end of word
         self._alphabet = list('.abcdefghijklmnopqrstuvwxyz')
         self._intMap = {c: i for i, c in enumerate(self._alphabet)}
-        self._N = torch.zeros((28, 28), dtype=torch.int32)
+        self._N = torch.zeros((27, 27), dtype=torch.int32)
         for word in lines:
             word = '.' + word + '.'
             for x, y in zip(word, word[1:]):
@@ -45,4 +45,5 @@ class Bigram:
 
 
 b = Bigram('names.txt')
-print(b.makeNames(5))
+names = b.makeNames(20)
+print('\n'.join(names))

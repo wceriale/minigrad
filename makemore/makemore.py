@@ -16,6 +16,7 @@ class Bigram:
                 ix1 = self._stoi(x)
                 ix2 = self._stoi(y)
                 self._N[ix1, ix2] += 1
+        self._P = self._N.float() / self._N.float().sum(1, keepdim=True)
 
     def _stoi(self, s):
         return self._intMap[s]
@@ -31,10 +32,7 @@ class Bigram:
             name = ''
             index = 0
             while True:
-                # convert our Matrix row into distributions
-                p = self._N[index].float()
-                p = p / p.sum()
-                nextIndex = torch.multinomial(p, num_samples=1, replacement=True, generator=g).item()
+                nextIndex = torch.multinomial(self._P[index], num_samples=1, replacement=True, generator=g).item()
                 letter = self._itos(nextIndex)
                 if nextIndex == 0: 
                     break

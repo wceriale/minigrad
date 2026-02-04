@@ -67,8 +67,14 @@ class BigramNN:
         names = []
         g = torch.Generator().manual_seed(2147483647)
         # Run softmax first to get probabilities
-        counts = self._W.exp()
-        probs = counts / counts.sum(1, keepdim=True)
+        
+        # x_enc = F.one_hot(self._xs, num_classes=27).float()
+        # logits = x_enc @ self._W
+        # counts = logits.exp()
+        # probs = counts / counts.sum(1, keepdim=True)
+
+        # counts = self._W.exp()
+        # probs = counts / counts.sum(1, keepdim=True)
 
         for _ in range(n):
             n = 0
@@ -76,7 +82,14 @@ class BigramNN:
             index = 0
             while True:
                 # print('W @ index: ' +  str(self._W[index]))
-                nextIndex = torch.multinomial(probs[index], num_samples=1, replacement=True, generator=g).item()
+                x_enc = F.one_hot(torch.tensor([index]), num_classes=27).float()
+                logits = x_enc @ self._W
+                counts = logits.exp()
+                probs = counts / counts.sum(1, keepdim=True)
+
+                # counts = self._W.exp()
+                # probs = counts / counts.sum(1, keepdim=True)
+                nextIndex = torch.multinomial(probs, num_samples=1, replacement=True, generator=g).item()
                 letter = self._itos(nextIndex)
 
                 if nextIndex == 0: 

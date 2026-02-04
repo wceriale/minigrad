@@ -53,7 +53,7 @@ class BigramNN:
             # get loss
             loss = -probs[torch.arange(self._xs.nelement()), self._ys].log().mean()
 
-            print('loss at step i:{i} =' + str(loss.item()))
+            print(f'loss at step i:{i} = {loss.item()}')
             self._W.grad = None  
             loss.backward()      
 
@@ -62,33 +62,21 @@ class BigramNN:
 
         print('loss at the very end=' + str(loss.item()))
 
-
-    def calc(self, words):
-        log_likelihood = 0
-        n = 0
-        for word in words:
-            chs = '.' + word + '.'
-            for x, y in zip(chs, chs[1:]):
-                ix1 = self._stoi(x)
-                ix2 = self._stoi(y)
-                prob = self._P[ix1, ix2]
-                logprob = torch.log(prob)
-                log_likelihood += logprob
-                n += 1
-                print(f'ch1={x}, ch2={y}, prob={prob: .4f}, logprob={logprob: 0.4f}')
-            print('-ll=' + str(-log_likelihood / n))
-
-
     # Create n names
     def makeNames(self, n):
         names = []
         g = torch.Generator().manual_seed(2147483647)
+        # Run softmax first to get probabilities
+        counts = self._W.exp()
+        probs = counts / counts.sum(1, keepdim=True)
+
         for _ in range(n):
             n = 0
             name = ''
             index = 0
             while True:
-                nextIndex = torch.multinomial(self._P[index], num_samples=1, replacement=True, generator=g).item()
+                # print('W @ index: ' +  str(self._W[index]))
+                nextIndex = torch.multinomial(probs[index], num_samples=1, replacement=True, generator=g).item()
                 letter = self._itos(nextIndex)
 
                 if nextIndex == 0: 
@@ -101,3 +89,4 @@ class BigramNN:
 
 b = BigramNN('names.txt')
 b.SGD(50, 100)
+print('\n'.join(b.makeNames(10)))
